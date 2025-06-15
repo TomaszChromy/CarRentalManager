@@ -35,7 +35,7 @@ export default function FiltersSidebar({ filters, onFiltersChange }: FiltersSide
           <Label className="text-sm font-medium text-gray-700 mb-2 block">Kategoria</Label>
           <div className="space-y-2">
             {[
-              { value: "", label: "Wszystkie" },
+              { value: "all", label: "Wszystkie" },
               { value: "economic", label: "Ekonomiczna" },
               { value: "compact", label: "Kompaktowa" },
               { value: "suv", label: "SUV" },
@@ -44,8 +44,8 @@ export default function FiltersSidebar({ filters, onFiltersChange }: FiltersSide
               <div key={option.value} className="flex items-center space-x-2">
                 <Checkbox
                   id={`category-${option.value}`}
-                  checked={filters.category === option.value}
-                  onCheckedChange={() => updateFilter("category", option.value)}
+                  checked={filters.category === (option.value === "all" ? "" : option.value)}
+                  onCheckedChange={() => updateFilter("category", option.value === "all" ? "" : option.value)}
                 />
                 <Label
                   htmlFor={`category-${option.value}`}
@@ -81,11 +81,11 @@ export default function FiltersSidebar({ filters, onFiltersChange }: FiltersSide
         <div>
           <Label className="text-sm font-medium text-gray-700 mb-2 block">Skrzynia biegów</Label>
           <RadioGroup 
-            value={filters.transmission} 
-            onValueChange={(value) => updateFilter("transmission", value)}
+            value={filters.transmission || "all"} 
+            onValueChange={(value) => updateFilter("transmission", value === "all" ? "" : value)}
           >
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="" id="transmission-all" />
+              <RadioGroupItem value="all" id="transmission-all" />
               <Label htmlFor="transmission-all" className="text-sm text-gray-600">Wszystkie</Label>
             </div>
             <div className="flex items-center space-x-2">
@@ -104,7 +104,7 @@ export default function FiltersSidebar({ filters, onFiltersChange }: FiltersSide
           <Label className="text-sm font-medium text-gray-700 mb-2 block">Paliwo</Label>
           <div className="space-y-2">
             {[
-              { value: "", label: "Wszystkie" },
+              { value: "all", label: "Wszystkie" },
               { value: "petrol", label: "Benzyna" },
               { value: "diesel", label: "Diesel" },
               { value: "electric", label: "Elektryczny" },
@@ -112,8 +112,8 @@ export default function FiltersSidebar({ filters, onFiltersChange }: FiltersSide
               <div key={option.value} className="flex items-center space-x-2">
                 <Checkbox
                   id={`fuel-${option.value}`}
-                  checked={filters.fuelType === option.value}
-                  onCheckedChange={() => updateFilter("fuelType", option.value)}
+                  checked={filters.fuelType === (option.value === "all" ? "" : option.value)}
+                  onCheckedChange={() => updateFilter("fuelType", option.value === "all" ? "" : option.value)}
                 />
                 <Label
                   htmlFor={`fuel-${option.value}`}
