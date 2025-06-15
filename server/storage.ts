@@ -117,8 +117,7 @@ export class MemStorage implements IStorage {
         location: "Warszawa Centrum",
         plateNumber: "WAW-001",
         lastServiceDate: new Date("2024-11-15"),
-        rating: "5.0",
-        reviewCount: 47,
+
       },
       {
         make: "Volkswagen",
@@ -137,8 +136,7 @@ export class MemStorage implements IStorage {
         location: "Warszawa Centrum",
         plateNumber: "WAW-002",
         lastServiceDate: new Date("2024-11-08"),
-        rating: "4.2",
-        reviewCount: 23,
+
       },
       {
         make: "BMW",
@@ -157,8 +155,7 @@ export class MemStorage implements IStorage {
         location: "Serwis BMW",
         plateNumber: "WAW-003",
         lastServiceDate: new Date("2024-11-01"),
-        rating: "4.9",
-        reviewCount: 89,
+
       },
     ];
 
@@ -200,6 +197,8 @@ export class MemStorage implements IStorage {
       id,
       loyaltyPoints: 0,
       createdAt: new Date(),
+      role: insertUser.role || "customer",
+      licenseNumber: insertUser.licenseNumber || null,
     };
     this.users.set(id, user);
     return user;
@@ -264,6 +263,9 @@ export class MemStorage implements IStorage {
       id,
       rating: "5.0",
       reviewCount: 0,
+      status: insertCar.status || "available",
+      hasAirConditioning: insertCar.hasAirConditioning ?? true,
+      imageUrl: insertCar.imageUrl || null,
     };
     this.cars.set(id, car);
     return car;
@@ -323,6 +325,8 @@ export class MemStorage implements IStorage {
       ...insertReservation,
       id,
       createdAt: new Date(),
+      status: insertReservation.status || "confirmed",
+      extras: insertReservation.extras || [],
     };
     this.reservations.set(id, reservation);
     return reservation;
@@ -347,6 +351,7 @@ export class MemStorage implements IStorage {
     const location: Location = {
       ...insertLocation,
       id,
+      isActive: insertLocation.isActive ?? true,
     };
     this.locations.set(id, location);
     return location;

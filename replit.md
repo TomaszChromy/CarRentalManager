@@ -114,7 +114,17 @@ Comprehensive component library built on Radix UI:
 
 Preferred communication style: Simple, everyday language.
 
-## Changelog
+## Recent Changes
 
-Changelog:
-- June 15, 2025. Initial setup
+- **June 15, 2025**: Complete car rental application implementation
+  - Built full Polish-language interface with professional UI
+  - Implemented car search and filtering system with real-time updates
+  - Created comprehensive reservation system with cost calculation and extras
+  - Developed customer dashboard with booking history and loyalty program
+  - Built admin dashboard for fleet management and reservation oversight
+  - Integrated notification system for business operations
+  - Added responsive design with proper Polish translations
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language (Polish).
