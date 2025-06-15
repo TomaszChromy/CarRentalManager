@@ -1,4 +1,6 @@
 import { users, cars, reservations, locations, type User, type InsertUser, type Car, type InsertCar, type Reservation, type InsertReservation, type Location, type InsertLocation } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -358,4 +360,182 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async getCar(id: number): Promise<Car | undefined> {
+    const [car] = await db.select().from(cars).where(eq(cars.id, id));
+    return car || undefined;
+  }
+
+  async getAllCars(filters?: {
+    category?: string;
+    transmission?: string;
+    fuelType?: string;
+    location?: string;
+    status?: string;
+    minPrice?: number;
+    maxPrice?: number;
+  }): Promise<Car[]> {
+    const conditions = [];
+    
+    if (filters?.category) {
+      conditions.push(eq(cars.category, filters.category));
+    }
+    if (filters?.transmission) {
+      conditions.push(eq(cars.transmission, filters.transmission));
+    }
+    if (filters?.fuelType) {
+      conditions.push(eq(cars.fuelType, filters.fuelType));
+    }
+    if (filters?.location) {
+      conditions.push(eq(cars.location, filters.location));
+    }
+    if (filters?.status) {
+      conditions.push(eq(cars.status, filters.status));
+    }
+    
+    let results;
+    if (conditions.length > 0) {
+      results = await db.select().from(cars).where(and(...conditions));
+    } else {
+      results = await db.select().from(cars);
+    }
+    
+    if (filters?.minPrice || filters?.maxPrice) {
+      return results.filter(car => {
+        const price = parseFloat(car.pricePerDay);
+        if (filters.minPrice && price < filters.minPrice) return false;
+        if (filters.maxPrice && price > filters.maxPrice) return false;
+        return true;
+      });
+    }
+    
+    return results;
+  }
+
+  async createCar(insertCar: InsertCar): Promise<Car> {
+    const [car] = await db
+      .insert(cars)
+      .values(insertCar)
+      .returning();
+    return car;
+  }
+
+  async updateCar(id: number, updates: Partial<InsertCar>): Promise<Car | undefined> {
+    const [car] = await db
+      .update(cars)
+      .set(updates)
+      .where(eq(cars.id, id))
+      .returning();
+    return car || undefined;
+  }
+
+  async deleteCar(id: number): Promise<boolean> {
+    const result = await db.delete(cars).where(eq(cars.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async getReservation(id: number): Promise<Reservation | undefined> {
+    const [reservation] = await db.select().from(reservations).where(eq(reservations.id, id));
+    return reservation || undefined;
+  }
+
+  async getReservationsByUser(userId: number): Promise<Reservation[]> {
+    return await db.select().from(reservations).where(eq(reservations.userId, userId));
+  }
+
+  async getAllReservations(filters?: {
+    status?: string;
+    startDate?: Date;
+    endDate?: Date;
+    userId?: number;
+  }): Promise<Reservation[]> {
+    const conditions = [];
+    
+    if (filters?.status) {
+      conditions.push(eq(reservations.status, filters.status));
+    }
+    if (filters?.userId) {
+      conditions.push(eq(reservations.userId, filters.userId));
+    }
+    
+    let results;
+    if (conditions.length > 0) {
+      results = await db.select().from(reservations).where(and(...conditions));
+    } else {
+      results = await db.select().from(reservations);
+    }
+    
+    if (filters?.startDate || filters?.endDate) {
+      return results.filter(reservation => {
+        if (filters.startDate && reservation.pickupDate < filters.startDate) return false;
+        if (filters.endDate && reservation.returnDate > filters.endDate) return false;
+        return true;
+      });
+    }
+    
+    return results;
+  }
+
+  async createReservation(insertReservation: InsertReservation): Promise<Reservation> {
+    const [reservation] = await db
+      .insert(reservations)
+      .values(insertReservation)
+      .returning();
+    return reservation;
+  }
+
+  async updateReservation(id: number, updates: Partial<InsertReservation>): Promise<Reservation | undefined> {
+    const [reservation] = await db
+      .update(reservations)
+      .set(updates)
+      .where(eq(reservations.id, id))
+      .returning();
+    return reservation || undefined;
+  }
+
+  async getAllLocations(): Promise<Location[]> {
+    return await db.select().from(locations).where(eq(locations.isActive, true));
+  }
+
+  async createLocation(insertLocation: InsertLocation): Promise<Location> {
+    const [location] = await db
+      .insert(locations)
+      .values(insertLocation)
+      .returning();
+    return location;
+  }
+}
+
+export const storage = new DatabaseStorage();
